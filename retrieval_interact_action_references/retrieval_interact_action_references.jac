@@ -4,8 +4,6 @@ import:py from logging { Logger }
 import:jac from jivas.agent.action.interact_action { InteractAction }
 import:jac from jivas.agent.memory.interaction_response { TextInteractionMessage, SilentInteractionMessage }
 
-
-
 node RetrievalInteractActionReferences :InteractAction: {
     # manages phoneme-based prompting to customize the pronunciation of certain words for text-to-speech models used by an agent
     # always ensure that this is registered after the final response is generated
@@ -26,13 +24,13 @@ Analyze the UTTERANCE, RESPONSE, and CONTEXT. Identify and return any relevant r
 - A reference is relevant if it provides the information stated in the response or is clearly linked to it.
 - Do not invent references. Use only what is explicitly provided in the context.
 
-UTTERANCE: 
+UTTERANCE:
 {utterance}
 
-RESPONSE: 
+RESPONSE:
 {response}
 
-CONTEXT: 
+CONTEXT:
 {context}
 
 Return a JSON object containing the "references". The "references" field should be list of strings.
