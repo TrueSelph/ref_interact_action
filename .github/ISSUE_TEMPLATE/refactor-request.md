@@ -1,6 +1,6 @@
 ---
 name: Refactor Request
-about: Request a refactor to the jivas RetrievalInteractActionReferences.
+about: Request a refactor to the jivas RefInteractAction.
 title: "[Refactor Request]: "
 labels: ''
 assignees: ''

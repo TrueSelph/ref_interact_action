@@ -8,7 +8,7 @@ import:jac from jivas.agent.action.retrieval_interact_action { RetrievalInteract
 import:jac from jivas.agent.memory.interaction_response { TextInteractionMessage, SilentInteractionMessage }
 
 
-node RetrievalInteractActionReferences :InteractAction: {
+node RefInteractAction :InteractAction: {
     # manages phoneme-based prompting to customize the pronunciation of certain words for text-to-speech models used by an agent
     # always ensure that this is registered after the final response is generated
 

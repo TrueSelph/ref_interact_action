@@ -1,23 +1,23 @@
-# Retrieval Interact Action References
+# Ref Interact Action
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/TrueSelph/retrieval_interact_action_references)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/TrueSelph/retrieval_interact_action_references/test-action.yaml)
-![GitHub issues](https://img.shields.io/github/issues/TrueSelph/retrieval_interact_action_references)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/TrueSelph/retrieval_interact_action_references)
-![GitHub](https://img.shields.io/github/license/TrueSelph/retrieval_interact_action_references)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/TrueSelph/ref_interact_action)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/TrueSelph/ref_interact_action/test-action.yaml)
+![GitHub issues](https://img.shields.io/github/issues/TrueSelph/ref_interact_action)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/TrueSelph/ref_interact_action)
+![GitHub](https://img.shields.io/github/license/TrueSelph/ref_interact_action)
 
 JIVAS action that adds references for the context that was used to generate the response.
 
 ## Package Information
 
-- **Name:** `jivas/retrieval_interact_action_references`
+- **Name:** `jivas/ref_interact_action`
 - **Author:** [V75 Inc.](https://v75inc.com/)
-- **Architype:** `RetrievalInteractActionReferences`
+- **Architype:** `RefInteractAction`
 - **Version:** `0.0.1`
 
 ## Meta Information
 
-- **Title:** Retrieval Interact Action References
+- **Title:** Ref Interact Action
 - **Description:** This action adds references to the context that was used to generate the response.
 - **Group:** core
 - **Type:** interact_action
@@ -54,8 +54,8 @@ Enable metadata for your retrieval interact action and add this action after per
 
 ## 🔰 Contributing
 
-- **🐛 [Report Issues](https://github.com/TrueSelph/retrieval_interact_action_references/issues)**: Submit bugs found or log feature requests for the `retrieval_interact_action_references` project.
-- **💡 [Submit Pull Requests](https://github.com/TrueSelph/retrieval_interact_action_references/blob/main/CONTRIBUTING.md)**: Review open PRs, and submit your own PRs.
+- **🐛 [Report Issues](https://github.com/TrueSelph/ref_interact_action/issues)**: Submit bugs found or log feature requests for the `ref_interact_action` project.
+- **💡 [Submit Pull Requests](https://github.com/TrueSelph/ref_interact_action/blob/main/CONTRIBUTING.md)**: Review open PRs, and submit your own PRs.
 
 <details closed>
 <summary>Contributing Guidelines</summary>
@@ -63,7 +63,7 @@ Enable metadata for your retrieval interact action and add this action after per
 1. **Fork the Repository**: Start by forking the project repository to your GitHub account.
 2. **Clone Locally**: Clone the forked repository to your local machine using a git client.
    ```sh
-   git clone https://github.com/TrueSelph/retrieval_interact_action_references
+   git clone https://github.com/TrueSelph/ref_interact_action
    ```
 3. **Create a New Branch**: Always work on a new branch, giving it a descriptive name.
    ```sh
@@ -86,8 +86,8 @@ Enable metadata for your retrieval interact action and add this action after per
 <summary>Contributor Graph</summary>
 <br>
 <p align="left">
-    <a href="https://github.com/TrueSelph/retrieval_interact_action_references/graphs/contributors">
-        <img src="https://contrib.rocks/image?repo=TrueSelph/retrieval_interact_action_references" />
+    <a href="https://github.com/TrueSelph/ref_interact_action/graphs/contributors">
+        <img src="https://contrib.rocks/image?repo=TrueSelph/ref_interact_action" />
    </a>
 </p>
 </details>

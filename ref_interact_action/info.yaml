@@ -1,10 +1,10 @@
 package:
-  name: jivas/retrieval_interact_action_references
+  name: jivas/ref_interact_action
   author: V75 Inc.
-  architype: RetrievalInteractActionReferences
+  architype: RefInteractAction
   version: 0.0.1
   meta:
-    title: Retrieval Interact Action References
+    title: Ref Interact Action
     description: This action adds references to the context used in generating the response.
     group: core
     type: interact_action

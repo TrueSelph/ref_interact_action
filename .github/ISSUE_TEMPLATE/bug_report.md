@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to report any bugs in the jivas RetrievalInteractActionReferences.
+about: Create a report to report any bugs in the jivas RefInteractAction.
 title: "[BUG]: "
 labels: ''
 assignees: ''

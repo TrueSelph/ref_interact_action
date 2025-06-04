@@ -1,4 +1,4 @@
-name: Running tests for jivas RetrievalInteractActionReferences
+name: Running tests for jivas RefInteractAction
 on:
   pull_request:
   push:
