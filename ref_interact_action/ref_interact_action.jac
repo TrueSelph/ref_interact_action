@@ -90,6 +90,10 @@ node RefInteractAction :InteractAction: {
             "- Length: Maximum 160 characters\n"
             "- Line breaks: Use basic separation\n"
             "- Avoid emojis unless requested"
+        ),
+
+        "default": (
+            "Structure messages with appropriate markdown formatting."
         )
     };
     has prompt: str = """
@@ -97,9 +101,8 @@ Analyze the UTTERANCE, RESPONSE, and CONTEXT. Identify and return all relevant r
 
 Instructions:
 - For each supporting item in CONTEXT, extract the corresponding reference(s) using the fields specified in REF_FIELDS.
-- Arrange each reference according to the pattern defined in REF_PATTERN.
-- Finally format the references using CHANNEL_FORMAT.
-- If no references in CONTEXT support the RESPONSE, return an empty list.
+- Arrange each reference according to the pattern defined in REF_PATTERN as a bulleted using the appropriate formatting in CHANNEL_FORMAT.
+- If no references in CONTEXT support the RESPONSE, return an empty string.
 
 
 Inputs:
@@ -122,12 +125,14 @@ CHANNEL_FORMAT:
 {channel_format}
 
 Output:
-Return a JSON object containing the "references". The "references" field should be list of strings.
+Return a JSON object with the result mapped to the key "references".
+
+
 """;
     # the field or fields (comma separated) in the metadata to use for crafting the references
-    has metadata_ref_fields:str = "source, filename, page";
+    has metadata_ref_fields:str = "filename, source, page";
     # an example format used for formatting the references based on the metadata_ref_fields
-    has metadata_ref_format:str = "( [filename](source), pp. <page>; [filename](source), pp. <page>; ... )";
+    has metadata_ref_format:str = "filename - source, pp. <page>";
 
     can post_register() {
         # to ensure compatibility, add this action to the exception list in intent_classifier
@@ -184,8 +189,10 @@ Return a JSON object containing the "references". The "references" field should 
                         if model_action_result {
                             result = model_action_result.get_json_result();
                             if (result.get("references")) {
-                                references = "\n".join(result["references"]);
-                                response += "\n\nReferences:\n" + references;
+                                response = """
+{response}
+
+{references}""".format(response=response, references=result.get("references"));
                                 visitor.interaction_node.set_message(TextInteractionMessage(content=response));
                             }
                         }
@@ -198,7 +205,7 @@ Return a JSON object containing the "references". The "references" field should 
     }
 
     can get_channel_format_directive(visitor: interact_graph_walker) -> dict {
-        channel = visitor.interaction_node.channel;
+        channel = visitor.interaction_node.channel or "default";
         return self.channel_format_directives.get(channel, None);
     }
 
