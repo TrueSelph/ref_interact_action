@@ -22,14 +22,85 @@ node RefInteractAction :InteractAction: {
     has history: bool = True;
     has history_size: int = 1;
     has max_statement_length: int = 2048;
+    has channel_format_directives: dict = {
+        "facebook": (
+            "Structure Facebook content with these formatting rules:\n"
+            "- Italic: Wrap text with underscores (_text_)\n"
+            "- Bold: Wrap text with asterisks (*text*)\n"
+            "- Strikethrough: Wrap text with tildes (~text~)\n"
+            "- URLs: Reformat all URLs to use raw URLs and not hyperlinks.\n"
+            "- Separate paragraphs with line breaks"
+        ),
+
+        "whatsapp": (
+            "Structure WhatsApp messages with these rules:\n"
+            "- Italic: Surround with underscores (_text_)\n"
+            "- Bold: Surround with asterisks (*text*)\n"
+            "- Strikethrough: Surround with tildes (~text~)\n"
+            "- Bullet lists: Start lines with * or -\n"
+            "- Numbered lists: Begin with 1. 2. 3.\n"
+            "- Quotes: Prefix lines with > symbol\n"
+            "- URLs: Reformat all URLs to use raw URLs and not hyperlinks.\n"
+            "- Separate sections with line breaks"
+        ),
+
+        "instagram": (
+            "Structure Instagram content with:\n"
+            "- Bold: Surround text with asterisks (*text*)\n"
+            "- Italic: Surround text with underscores (_text_)\n"
+            "- URLs: Place only in bio or caption as plain text\n"
+            "- Use single line breaks between paragraphs\n"
+            "- Maximum 30 hashtags at caption end"
+        ),
+
+        "twitter": (
+            "Structure Twitter/X posts with:\n"
+            "- Bold: Use asterisks (*text*)\n"
+            "- Italic: Use underscores (_text_)\n"
+            "- URLs: Prefer shortened versions (like bit.ly/example)\n"
+            "- Threads: Start with (1/3) indicator\n"
+            "- Keep under 280 characters per tweet"
+        ),
+
+        "linkedin": (
+            "Structure LinkedIn posts with:\n"
+            "- Bold: Asterisks around text (*text*)\n"
+            "- Italic: Underscores around text (_text_)\n"
+            "- Bullets: Start lines with * or -\n"
+            "- URLs: Reformat all URLs to use raw URLs and not hyperlinks.\n"
+            "- Sections: Separate with --- on own line\n"
+            "- Paragraphs: Maximum 5 lines each"
+        ),
+
+        "email": (
+            "Structure emails with:\n"
+            "- Bold: Surround with asterisks (*important*)\n"
+            "- Italic: Surround with underscores (_emphasis_)\n"
+            "- Lists: Use * or - for bullet points\n"
+            "- Quotes: Begin lines with > symbol\n"
+            "- URLs: Plain text with descriptive context\n"
+            "- Subject lines: Under 60 characters\n"
+            "- Include formal greetings/closings"
+        ),
+
+        "sms": (
+            "Structure SMS messages with:\n"
+            "- No special formatting symbols\n"
+            "- URLs: Shorten when possible\n"
+            "- Length: Maximum 160 characters\n"
+            "- Line breaks: Use basic separation\n"
+            "- Avoid emojis unless requested"
+        )
+    };
     has prompt: str = """
 Analyze the UTTERANCE, RESPONSE, and CONTEXT. Identify and return all relevant references from the CONTEXT that support the information in the RESPONSE.
 
 Instructions:
 - For each supporting item in CONTEXT, extract the corresponding reference(s) using the fields specified in REF_FIELDS.
-- Format each reference according to the pattern defined in REF_FORMAT.
-- Ensure all returned references are unique.
+- Arrange each reference according to the pattern defined in REF_PATTERN.
+- Finally format the references using CHANNEL_FORMAT.
 - If no references in CONTEXT support the RESPONSE, return an empty list.
+
 
 Inputs:
 UTTERANCE:
@@ -44,8 +115,11 @@ CONTEXT:
 REF_FIELDS:
 {ref_fields}
 
-REF_FORMAT:
-{ref_format}
+REF_PATTERN:
+{ref_pattern}
+
+CHANNEL_FORMAT:
+{channel_format}
 
 Output:
 Return a JSON object containing the "references". The "references" field should be list of strings.
@@ -67,6 +141,10 @@ Return a JSON object containing the "references". The "references" field should 
 
     }
 
+    can on_enable() {
+        self.get_agent().get_actions() spawn _configure_retrieval_action();
+    }
+
     can touch(visitor: interact_graph_walker) -> bool {
         if(visitor.interaction_node.has_response() and visitor.interaction_node.context_data.get('RetrievalInteractAction_context')) {
             return True;
@@ -83,10 +161,11 @@ Return a JSON object containing the "references". The "references" field should 
                     prompt_messages = [{"system": self.prompt}];
                     prompt_variables = {
                         "ref_fields": self.metadata_ref_fields,
-                        "ref_format": self.metadata_ref_format,
+                        "ref_pattern": self.metadata_ref_format,
                         "context": context_json,
                         "response": response,
-                        "utterance": utterance
+                        "utterance": utterance,
+                        "channel_format": self.get_channel_format_directive(visitor=visitor)
                     };
 
                     model_action = self.get_agent().get_action(action_label=self.model_action);
@@ -118,6 +197,10 @@ Return a JSON object containing the "references". The "references" field should 
         }
     }
 
+    can get_channel_format_directive(visitor: interact_graph_walker) -> dict {
+        channel = visitor.interaction_node.channel;
+        return self.channel_format_directives.get(channel, None);
+    }
 
     can healthcheck() -> Union[bool, dict] {
 
@@ -172,6 +255,7 @@ walker _configure_retrieval_action {
 
     can on_action with RetrievalInteractAction entry {
         here.metadata = True;
+        here.references = False;
     }
 
 }
