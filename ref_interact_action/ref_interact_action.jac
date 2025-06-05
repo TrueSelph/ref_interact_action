@@ -19,9 +19,6 @@ node RefInteractAction :InteractAction: {
     has model_name: str = "gpt-4o";
     has model_max_tokens:int = 4096;
     has model_temperature: float = 0.0;
-    has history: bool = True;
-    has history_size: int = 1;
-    has max_statement_length: int = 2048;
     has channel_format_directives: dict = {
         "facebook": (
             "Structure Facebook content with these formatting rules:\n"
@@ -119,11 +116,13 @@ node RefInteractAction :InteractAction: {
     3. **Output Requirements**:
     - Begin with "Read more here:" **translated into the language of RESPONSE**.
     - Format as valid JSON with single key "references"
-    - Return empty string "" if no relevant references found
+    - Return empty string "" if no relevant references found'
     - Exclude markdown delimiters
     - Include only formatted references, no additional text
 
-    Note: Response must be a valid JSON object containing only the "references" key and formatted reference string.
+    4. **Output Review**:
+    - When multiple reference list items have the same source/filename but different pages, combine them into a single entry (e.g., "Book Title, pg. 1, 2, 3")
+    - Response must be a valid JSON object containing only the "references" key and formatted reference string.
 
     UTTERANCE:
     {utterance}
