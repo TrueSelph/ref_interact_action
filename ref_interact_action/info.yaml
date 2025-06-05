@@ -1,0 +1,22 @@
+package:
+  name: jivas/ref_interact_action
+  author: V75 Inc.
+  architype: RefInteractAction
+  version: 0.0.1
+  meta:
+    title: Ref Interact Action
+    description: This action adds references to the context used in generating the response.
+    group: core
+    type: interact_action
+  config:
+    singleton: false
+    order:
+      weight: 0
+      after: jivas/persona_interact_action
+      before: jivas/phoneme_interact_action
+  dependencies:
+    jivas: ^2.0.0
+    actions:
+      jivas/persona_interact_action: ~0.0.1
+
+
