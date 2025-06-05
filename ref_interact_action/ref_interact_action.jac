@@ -97,32 +97,34 @@ node RefInteractAction :InteractAction: {
             "- Italic: Wrap text with underscores (_text_)\n"
             "- Bold: Wrap text with asterisks (*text*)\n"
             "- Strikethrough: Wrap text with tildes (~text~)\n"
-            "- URLs: Reformat all URLs to use markdown ([link text](url)).\n"
+            "- URLs: Reformat all URLs to use markdown ([link text or filename](url)).\n"
             "- Separate paragraphs with line breaks"
         )
     };
-    has prompt: str = """    
-    ## **Objective**  
-    Analyze the provided `UTTERANCE`, `RESPONSE`, and `CONTEXT` to identify and return all references from `CONTEXT` that support the `RESPONSE`.  
+    has prompt: str = """
+    ## **Objective**
+    Analyze the provided `UTTERANCE`, `RESPONSE`, and `CONTEXT` to identify and format relevant references from `CONTEXT` that support the `RESPONSE`.
 
-    ## **Instructions**  
-    1. **Extraction**:  
-    - For each claim/fact in `RESPONSE`, search for supporting evidence in `CONTEXT`.  
-    - Extract matching references using the fields specified in `REF_FIELDS`.  
+    ## **Instructions**
+    1. **Reference Identification**:
+    - Match key information in `RESPONSE` with supporting evidence in `CONTEXT`
+    - Use fields specified in `REF_FIELDS` to extract reference details
+    - Ensure references directly support claims made in the response
 
-    2. **Formatting**:  
-    - Structure each reference item according to `REF_PATTERN`.  
-    - Present each reference item as a bulleted list, applying formatting rules for URLs and titles from `CHANNEL_FORMAT`.  
+    2. **Reference Formatting**:
+    - Apply the structure defined in `REF_PATTERN`
+    - Follow `CHANNEL_FORMAT` rules for URLs and text styling
+    - Create a bulleted list of references with proper spacing
 
-    3. **Output Rules**:  
-    - Ensure you match the language of RESPONSE.
-    - Your generated collection of references should be composed as a string with appropriate line breaks and bullets for readability.
-    - If no supporting references exist, return `""` for `"references"`.  
-    - Output must be a **valid JSON object** with the key `"references"` and the value as your generated collection of formatted references. 
-    - Do not enclose any output in markdown delimiters!
-    - Do not include any additional text in the output.
+    3. **Output Requirements**:
+    - Begin with "Read more here:" **translated into the language of RESPONSE**.
+    - Format as valid JSON with single key "references"
+    - Return empty string "" if no relevant references found
+    - Exclude markdown delimiters
+    - Include only formatted references, no additional text
 
-    Inputs:
+    Note: Response must be a valid JSON object containing only the "references" key and formatted reference string.
+
     UTTERANCE:
     {utterance}
 
@@ -140,20 +142,19 @@ node RefInteractAction :InteractAction: {
 
     CHANNEL_FORMAT:
     {channel_format}
-            
+
     """;
 
     has response_template:str = """
 {response}
 
-Read more here:
 {references}
 """;
 
     # the field or fields (comma separated) in the metadata to use for crafting the references
     has metadata_ref_fields:str = "filename, source, page";
     # an example format used for formatting the references based on the metadata_ref_fields
-    has metadata_ref_format:str = "filename - source, pg. <page>";
+    has metadata_ref_format:str = "<source>, pg. <page>";
 
     can post_register() {
         # to ensure compatibility, add this action to the exception list in intent_classifier
