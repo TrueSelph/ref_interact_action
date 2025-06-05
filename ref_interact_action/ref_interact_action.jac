@@ -19,9 +19,6 @@ node RefInteractAction :InteractAction: {
     has model_name: str = "gpt-4o";
     has model_max_tokens:int = 4096;
     has model_temperature: float = 0.0;
-    has history: bool = True;
-    has history_size: int = 1;
-    has max_statement_length: int = 2048;
     has channel_format_directives: dict = {
         "facebook": (
             "Structure Facebook content with these formatting rules:\n"
@@ -93,46 +90,70 @@ node RefInteractAction :InteractAction: {
         ),
 
         "default": (
-            "Structure messages with appropriate markdown formatting."
+            "Use default formatting rules:\n"
+            "- Italic: Wrap text with underscores (_text_)\n"
+            "- Bold: Wrap text with asterisks (*text*)\n"
+            "- Strikethrough: Wrap text with tildes (~text~)\n"
+            "- URLs: Reformat all URLs to use markdown ([link text or filename](url)).\n"
+            "- Separate paragraphs with line breaks"
         )
     };
     has prompt: str = """
-Analyze the UTTERANCE, RESPONSE, and CONTEXT. Identify and return all relevant references from the CONTEXT that support the information in the RESPONSE.
+    ## **Objective**
+    Analyze the provided `UTTERANCE`, `RESPONSE`, and `CONTEXT` to identify and format relevant references from `CONTEXT` that support the `RESPONSE`.
 
-Instructions:
-- For each supporting item in CONTEXT, extract the corresponding reference(s) using the fields specified in REF_FIELDS.
-- Arrange each reference according to the pattern defined in REF_PATTERN as a bulleted using the appropriate formatting in CHANNEL_FORMAT.
-- If no references in CONTEXT support the RESPONSE, return an empty string.
+    ## **Instructions**
+    1. **Reference Identification**:
+    - Match key information in `RESPONSE` with supporting evidence in `CONTEXT`
+    - Use fields specified in `REF_FIELDS` to extract reference details
+    - Ensure references directly support claims made in the response
 
+    2. **Reference Formatting**:
+    - Apply the structure defined in `REF_PATTERN`
+    - Follow `CHANNEL_FORMAT` rules for URLs and text styling
+    - Create a bulleted list of references with proper spacing
 
-Inputs:
-UTTERANCE:
-{utterance}
+    3. **Output Requirements**:
+    - Begin with "Read more here:" **translated into the language of RESPONSE**.
+    - Format as valid JSON with single key "references"
+    - Return empty string "" if no relevant references found'
+    - Exclude markdown delimiters
+    - Include only formatted references, no additional text
 
-RESPONSE:
+    4. **Output Review**:
+    - When multiple reference list items have the same source/filename but different pages, combine them into a single entry (e.g., "Book Title, pg. 1, 2, 3")
+    - Response must be a valid JSON object containing only the "references" key and formatted reference string.
+
+    UTTERANCE:
+    {utterance}
+
+    RESPONSE:
+    {response}
+
+    CONTEXT:
+    {context}
+
+    REF_FIELDS:
+    {ref_fields}
+
+    REF_PATTERN:
+    {ref_pattern}
+
+    CHANNEL_FORMAT:
+    {channel_format}
+
+    """;
+
+    has response_template:str = """
 {response}
 
-CONTEXT:
-{context}
-
-REF_FIELDS:
-{ref_fields}
-
-REF_PATTERN:
-{ref_pattern}
-
-CHANNEL_FORMAT:
-{channel_format}
-
-Output:
-Return a JSON object with the result mapped to the key "references".
-
-
+{references}
 """;
+
     # the field or fields (comma separated) in the metadata to use for crafting the references
     has metadata_ref_fields:str = "filename, source, page";
     # an example format used for formatting the references based on the metadata_ref_fields
-    has metadata_ref_format:str = "filename - source, pp. <page>";
+    has metadata_ref_format:str = "<source>, pg. <page>";
 
     can post_register() {
         # to ensure compatibility, add this action to the exception list in intent_classifier
@@ -188,11 +209,8 @@ Return a JSON object with the result mapped to the key "references".
 
                         if model_action_result {
                             result = model_action_result.get_json_result();
-                            if (result.get("references")) {
-                                response = """
-{response}
-
-{references}""".format(response=response, references=result.get("references"));
+                            if (references := result.get("references")) {
+                                response = self.response_template.format(response=response, references=references);
                                 visitor.interaction_node.set_message(TextInteractionMessage(content=response));
                             }
                         }
