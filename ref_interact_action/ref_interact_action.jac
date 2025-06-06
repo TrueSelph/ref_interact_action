@@ -117,7 +117,7 @@ node RefInteractAction :InteractAction: {
     - Begin with "Read more here:" **translated into the language of RESPONSE**.
     - Format as valid JSON with single key "references"
     - Return empty string "" if no relevant references found'
-    - Exclude markdown delimiters
+    - Exclude markdown and JSON delimiters
     - Include only formatted references, no additional text
 
     4. **Output Review**:
