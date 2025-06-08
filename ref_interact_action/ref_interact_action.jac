@@ -15,6 +15,7 @@ node RefInteractAction :InteractAction: {
     # set up logger
     static has logger:Logger = logging.getLogger(__name__);
 
+    has retrieval_interact_action: str = "TypesenseRetrievalInteractAction";
     has model_action: str = "LangChainModelAction";
     has model_name: str = "gpt-4o";
     has model_max_tokens:int = 4096;
@@ -157,38 +158,40 @@ node RefInteractAction :InteractAction: {
 
     can post_register() {
         # to ensure compatibility, add this action to the exception list in intent_classifier
-        if(intent_interact_action_node := self.get_agent().get_actions().get(action_label='IntentInteractAction')) {
+        if(intent_interact_action_node := self.get_agent().get_action(action_label='IntentInteractAction')) {
             if(self.get_type() not in intent_interact_action_node.exceptions) {
                 intent_interact_action_node.exceptions += [self.get_type()];
             }
         }
-
-        self.get_agent().get_actions() spawn _configure_retrieval_action();
-
-    }
-
-    can on_enable() {
-        self.get_agent().get_actions() spawn _configure_retrieval_action();
+        self.get_agent().get_actions() spawn _configure_retrieval_action(self.retrieval_interact_action);
     }
 
     can touch(visitor: interact_graph_walker) -> bool {
-        if(visitor.interaction_node.has_response() and visitor.interaction_node.context_data.get('RetrievalInteractAction_context')) {
+        response_context = visitor.interaction_node.context_data.get(self.retrieval_interact_action, {}).get('context', []);
+        if(visitor.interaction_node.has_response() and response_context) {
             return True;
         }
     }
 
+    can on_enable() {
+        self.get_agent().get_actions() spawn _configure_retrieval_action(self.retrieval_interact_action);
+    }
+
     can execute(visitor: interact_graph_walker) -> dict {
-        utterance = visitor.interaction_node.context_data.get('RetrievalInteractAction_query', '');
-        context_json = visitor.interaction_node.context_data.get('RetrievalInteractAction_context', []);
+        retrieval_context = visitor.interaction_node.context_data.get(self.retrieval_interact_action, {});
+
+        utterance = retrieval_context.get('query', '');
+        response_context = retrieval_context.get('context', []);
         response = visitor.interaction_node.response.get('message', {}).get('content', '');
+
         try {
-            if (utterance and context_json) {
-                if "metadata" in context_json[0] {
+            if (utterance and response_context) {
+                if "metadata" in response_context[0] {
                     prompt_messages = [{"system": self.prompt}];
                     prompt_variables = {
                         "ref_fields": self.metadata_ref_fields,
                         "ref_pattern": self.metadata_ref_format,
-                        "context": context_json,
+                        "context": response_context,
                         "response": response,
                         "utterance": utterance,
                         "channel_format": self.get_channel_format_directive(visitor=visitor)
@@ -266,22 +269,20 @@ node RefInteractAction :InteractAction: {
     }
 }
 
-
-
 walker _configure_retrieval_action {
+
+    has retrieval_interact_action: str = "";
 
     obj __specs__ {
         static has private: bool = True;
     }
 
     can on_actions with Actions entry {
-        visit [-->](`?RetrievalInteractAction);
+        visit [-->](`?RetrievalInteractAction)(?label==self.retrieval_interact_action)(?enabled==True);
     }
 
     can on_action with RetrievalInteractAction entry {
         here.metadata = True;
-        here.references = False;
     }
 
 }
-
