@@ -14,7 +14,7 @@ package:
       weight: 10
       after: all
   dependencies:
-    jivas: ">=2.0.0-alpha.51
+    jivas: ">=2.0.0-alpha.51"
     actions:
       jivas/persona_interact_action: ~0.0.1
 
