@@ -7,3 +7,6 @@
 
 ## 0.0.3
 - Updated install ordering to ensure this executes after any response message modifiers like phoneme
+
+## 0.0.4
+- Updated for compatibility with updated RetrievalInteractAction in JIVAS alpha.51

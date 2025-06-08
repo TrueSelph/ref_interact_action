@@ -2,7 +2,7 @@ package:
   name: jivas/ref_interact_action
   author: V75 Inc.
   architype: RefInteractAction
-  version: 0.0.3
+  version: 0.0.4
   meta:
     title: Ref Interact Action
     description: This action adds references to the context used in generating the response.
@@ -14,7 +14,7 @@ package:
       weight: 10
       after: all
   dependencies:
-    jivas: ^2.0.0
+    jivas: ">=2.0.0-alpha.51"
     actions:
       jivas/persona_interact_action: ~0.0.1
 
