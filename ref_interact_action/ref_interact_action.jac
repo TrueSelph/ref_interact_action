@@ -5,7 +5,7 @@ import:jac from jivas.agent.action.actions { Actions }
 import:jac from jivas.agent.action.interact_action { InteractAction }
 import:jac from jivas.agent.action.interact_graph_walker { interact_graph_walker }
 import:jac from jivas.agent.action.retrieval_interact_action { RetrievalInteractAction }
-import:jac from jivas.agent.memory.interaction_response { TextInteractionMessage, SilentInteractionMessage }
+import:jac from jivas.agent.memory.interaction_response { InteractionMessage, TextInteractionMessage, SilentInteractionMessage }
 
 
 node RefInteractAction :InteractAction: {
@@ -214,7 +214,13 @@ node RefInteractAction :InteractAction: {
                             result = model_action_result.get_json_result();
                             if (references := result.get("references")) {
                                 response = self.response_template.format(response=response, references=references);
-                                visitor.interaction_node.set_message(TextInteractionMessage(content=response));
+                                interaction_message = visitor.interaction_node.get_message();
+                                if not interaction_message {
+                                    interaction_message = TextInteractionMessage(content=response);
+                                } else {
+                                    interaction_message.content = response;
+                                }
+                                visitor.interaction_node.set_message(interaction_message);
                             }
                         }
                     }
