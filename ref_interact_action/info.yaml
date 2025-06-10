@@ -2,7 +2,7 @@ package:
   name: jivas/ref_interact_action
   author: V75 Inc.
   architype: RefInteractAction
-  version: 0.0.4
+  version: 0.0.5
   meta:
     title: Ref Interact Action
     description: This action adds references to the context used in generating the response.

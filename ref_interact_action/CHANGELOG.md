@@ -10,3 +10,6 @@
 
 ## 0.0.4
 - Updated for compatibility with updated RetrievalInteractAction in JIVAS alpha.51
+
+## 0.0.5
+- Bugfix: Ref appending now preserves phoneme content if injected into meta
