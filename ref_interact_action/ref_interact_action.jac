@@ -26,7 +26,7 @@ node RefInteractAction(InteractAction) {
             "- Italic: Wrap text with underscores (_text_)\n"
             "- Bold: Wrap text with asterisks (*text*)\n"
             "- Strikethrough: Wrap text with tildes (~text~)\n"
-            "- URLs: Reformat all URLs to use raw URLs and not hyperlinks.\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Separate paragraphs with line breaks"
         ),
 
@@ -38,7 +38,7 @@ node RefInteractAction(InteractAction) {
             "- Bullet lists: Start lines with * or -\n"
             "- Numbered lists: Begin with 1. 2. 3.\n"
             "- Quotes: Prefix lines with > symbol\n"
-            "- URLs: Reformat all URLs to use raw URLs and not hyperlinks.\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Separate sections with line breaks"
         ),
 
@@ -46,7 +46,7 @@ node RefInteractAction(InteractAction) {
             "Structure Instagram content with:\n"
             "- Bold: Surround text with asterisks (*text*)\n"
             "- Italic: Surround text with underscores (_text_)\n"
-            "- URLs: Place only in bio or caption as plain text\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Use single line breaks between paragraphs\n"
             "- Maximum 30 hashtags at caption end"
         ),
@@ -55,7 +55,7 @@ node RefInteractAction(InteractAction) {
             "Structure Twitter/X posts with:\n"
             "- Bold: Use asterisks (*text*)\n"
             "- Italic: Use underscores (_text_)\n"
-            "- URLs: Prefer shortened versions (like bit.ly/example)\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Threads: Start with (1/3) indicator\n"
             "- Keep under 280 characters per tweet"
         ),
@@ -65,7 +65,7 @@ node RefInteractAction(InteractAction) {
             "- Bold: Asterisks around text (*text*)\n"
             "- Italic: Underscores around text (_text_)\n"
             "- Bullets: Start lines with * or -\n"
-            "- URLs: Reformat all URLs to use raw URLs and not hyperlinks.\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Sections: Separate with --- on own line\n"
             "- Paragraphs: Maximum 5 lines each"
         ),
@@ -76,7 +76,7 @@ node RefInteractAction(InteractAction) {
             "- Italic: Surround with underscores (_emphasis_)\n"
             "- Lists: Use * or - for bullet points\n"
             "- Quotes: Begin lines with > symbol\n"
-            "- URLs: Plain text with descriptive context\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Subject lines: Under 60 characters\n"
             "- Include formal greetings/closings"
         ),
@@ -88,15 +88,6 @@ node RefInteractAction(InteractAction) {
             "- Length: Maximum 160 characters\n"
             "- Line breaks: Use basic separation\n"
             "- Avoid emojis unless requested"
-        ),
-
-        "default": (
-            "Use default formatting rules:\n"
-            "- Italic: Wrap text with underscores (_text_)\n"
-            "- Bold: Wrap text with asterisks (*text*)\n"
-            "- Strikethrough: Wrap text with tildes (~text~)\n"
-            "- URLs: Reformat all URLs to use markdown ([link text or filename](url)).\n"
-            "- Separate paragraphs with line breaks"
         )
     };
     has prompt: str = """
