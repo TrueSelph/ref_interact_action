@@ -1,14 +1,14 @@
-import:py logging;
-import:py traceback;
-import:py from logging { Logger }
-import:jac from jivas.agent.action.actions { Actions }
-import:jac from jivas.agent.action.interact_action { InteractAction }
-import:jac from jivas.agent.action.interact_graph_walker { interact_graph_walker }
-import:jac from jivas.agent.action.retrieval_interact_action { RetrievalInteractAction }
-import:jac from jivas.agent.memory.interaction_response { InteractionMessage, TextInteractionMessage, SilentInteractionMessage }
+import logging;
+import traceback;
+import from logging { Logger }
+import from jivas.agent.action.actions { Actions }
+import from jivas.agent.action.interact_action { InteractAction }
+import from jivas.agent.action.interact_graph_walker { interact_graph_walker }
+import from jivas.agent.action.retrieval_interact_action { RetrievalInteractAction }
+import from jivas.agent.memory.interaction_response { InteractionMessage, TextInteractionMessage, SilentInteractionMessage }
 
 
-node RefInteractAction :InteractAction: {
+node RefInteractAction(InteractAction) {
     # manages phoneme-based prompting to customize the pronunciation of certain words for text-to-speech models used by an agent
     # always ensure that this is registered after the final response is generated
 
@@ -156,7 +156,7 @@ node RefInteractAction :InteractAction: {
     # an example format used for formatting the references based on the metadata_ref_fields
     has metadata_ref_format:str = "<source>, pg. <page>";
 
-    can post_register() {
+    def post_register() {
         # to ensure compatibility, add this action to the exception list in intent_classifier
         if(intent_interact_action_node := self.get_agent().get_action(action_label='IntentInteractAction')) {
             if(self.get_type() not in intent_interact_action_node.exceptions) {
@@ -166,18 +166,18 @@ node RefInteractAction :InteractAction: {
         self.get_agent().get_actions() spawn _configure_retrieval_action(self.retrieval_interact_action);
     }
 
-    can touch(visitor: interact_graph_walker) -> bool {
+    def touch(visitor: interact_graph_walker) -> bool {
         response_context = visitor.interaction_node.context_data.get(self.retrieval_interact_action, {}).get('context', []);
         if(visitor.interaction_node.has_response() and response_context) {
             return True;
         }
     }
 
-    can on_enable() {
+    def on_enable() {
         self.get_agent().get_actions() spawn _configure_retrieval_action(self.retrieval_interact_action);
     }
 
-    can execute(visitor: interact_graph_walker) -> dict {
+    def execute(visitor: interact_graph_walker) -> None {
         retrieval_context = visitor.interaction_node.context_data.get(self.retrieval_interact_action, {});
 
         utterance = retrieval_context.get('query', '');
@@ -202,11 +202,9 @@ node RefInteractAction :InteractAction: {
                         model_action_result = model_action.call_model(
                             prompt_messages=prompt_messages,
                             prompt_variables=prompt_variables,
-                            kwargs={
-                                "model_name": self.model_name,
-                                "model_temperature": self.model_temperature,
-                                "model_max_tokens": self.model_max_tokens
-                            },
+                            model_name = self.model_name,
+                            model_temperature = self.model_temperature,
+                            model_max_tokens = self.model_max_tokens,
                             interaction_node=visitor.interaction_node
                         );
 
@@ -231,23 +229,24 @@ node RefInteractAction :InteractAction: {
         }
     }
 
-    can get_channel_format_directive(visitor: interact_graph_walker) -> dict {
+    def get_channel_format_directive(visitor: interact_graph_walker) -> dict {
         channel = visitor.interaction_node.channel or "default";
         return self.channel_format_directives.get(channel, None);
     }
 
-    can healthcheck() -> Union[bool, dict] {
+    def healthcheck() -> Union[bool, dict] {
 
         test_prompt_messages = [{"system" : "Output the result of 2 + 2"}];
-        test_kwargs = {
-            "model_name": self.model_name,
-            "model_temperature": self.model_temperature,
-            "model_max_tokens": self.model_max_tokens
-        };
 
         try {
             model_action = self.get_agent().get_action(action_label=self.model_action);
-            if( model_action_result := model_action.call_model(prompt_messages = test_prompt_messages, prompt_variables = {}, kwargs = test_kwargs)) {               # set the interaction message+
+            if( model_action_result := model_action.call_model(
+                prompt_messages = test_prompt_messages,
+                prompt_variables = {},
+                model_name = self.model_name,
+                model_temperature = self.model_temperature,
+                model_max_tokens = self.model_max_tokens,
+            )) {               # set the interaction message+
                 interaction_message = model_action_result.get_result();
                 if not interaction_message {
                     return {
