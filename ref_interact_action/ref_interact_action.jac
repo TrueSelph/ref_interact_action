@@ -89,7 +89,7 @@ node RefInteractAction(InteractAction) {
             "- Line breaks: Use basic separation\n"
             "- Avoid emojis unless requested"
         ),
-        
+
         "default": (
             "Use default formatting rules:\n"
             "- Italic: Wrap text with underscores (_text_)\n"
@@ -241,8 +241,8 @@ node RefInteractAction(InteractAction) {
         try {
             model_action = self.get_agent().get_action(action_label=self.model_action);
             if( model_action_result := model_action.call_model(
-                prompt_messages = test_prompt_messages, 
-                prompt_variables = {}, 
+                prompt_messages = test_prompt_messages,
+                prompt_variables = {},
                 model_name = self.model_name,
                 model_temperature = self.model_temperature,
                 model_max_tokens = self.model_max_tokens,
