@@ -3,7 +3,7 @@ import traceback;
 import from logging { Logger }
 import from jivas.agent.action.actions { Actions }
 import from jivas.agent.action.interact_action { InteractAction }
-import from jivas.agent.action.interact_graph_walker { interact_graph_walker }
+import from jivas.agent.action.agent_graph_walker { agent_graph_walker }
 import from jivas.agent.action.retrieval_interact_action { RetrievalInteractAction }
 import from jivas.agent.memory.interaction_response { InteractionMessage, TextInteractionMessage, SilentInteractionMessage }
 
@@ -88,6 +88,15 @@ node RefInteractAction(InteractAction) {
             "- Length: Maximum 160 characters\n"
             "- Line breaks: Use basic separation\n"
             "- Avoid emojis unless requested"
+        ),
+        
+        "default": (
+            "Use default formatting rules:\n"
+            "- Italic: Wrap text with underscores (_text_)\n"
+            "- Bold: Wrap text with asterisks (*text*)\n"
+            "- Strikethrough: Wrap text with tildes (~text~)\n"
+            "- URLs: Reformat all URLs to use markdown ([link text or filename](url)).\n"
+            "- Separate paragraphs with line breaks"
         )
     };
     has prompt: str = """
@@ -157,8 +166,8 @@ node RefInteractAction(InteractAction) {
         self.get_agent().get_actions() spawn _configure_retrieval_action(self.retrieval_interact_action);
     }
 
-    def touch(visitor: interact_graph_walker) -> bool {
-        response_context = visitor.interaction_node.context_data.get(self.retrieval_interact_action, {}).get('context', []);
+    def touch(visitor: agent_graph_walker) -> bool {
+        response_context = visitor.interaction_node.data_get(self.retrieval_interact_action, {});
         if(visitor.interaction_node.has_response() and response_context) {
             return True;
         }
@@ -168,8 +177,8 @@ node RefInteractAction(InteractAction) {
         self.get_agent().get_actions() spawn _configure_retrieval_action(self.retrieval_interact_action);
     }
 
-    def execute(visitor: interact_graph_walker) -> None {
-        retrieval_context = visitor.interaction_node.context_data.get(self.retrieval_interact_action, {});
+    def execute(visitor: agent_graph_walker) -> None {
+        retrieval_context = visitor.interaction_node.data_get(self.retrieval_interact_action, {});
 
         utterance = retrieval_context.get('query', '');
         response_context = retrieval_context.get('context', []);
@@ -220,7 +229,7 @@ node RefInteractAction(InteractAction) {
         }
     }
 
-    def get_channel_format_directive(visitor: interact_graph_walker) -> dict {
+    def get_channel_format_directive(visitor: agent_graph_walker) -> dict {
         channel = visitor.interaction_node.channel or "default";
         return self.channel_format_directives.get(channel, None);
     }
@@ -232,8 +241,8 @@ node RefInteractAction(InteractAction) {
         try {
             model_action = self.get_agent().get_action(action_label=self.model_action);
             if( model_action_result := model_action.call_model(
-                prompt_messages = test_prompt_messages,
-                prompt_variables = {},
+                prompt_messages = test_prompt_messages, 
+                prompt_variables = {}, 
                 model_name = self.model_name,
                 model_temperature = self.model_temperature,
                 model_max_tokens = self.model_max_tokens,
