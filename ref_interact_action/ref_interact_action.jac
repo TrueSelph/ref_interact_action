@@ -260,7 +260,7 @@ node RefInteractAction(InteractAction) {
             }
             return {
                 "status": False,
-                "message": "Unable to excute LLM call. Check API key and model configuration.",
+                "message": "Unable to execute LLM call. Check API key and model configuration.",
                 "severity": "error"
             };
         } except Exception as e {
