@@ -236,33 +236,55 @@ node RefInteractAction(InteractAction) {
 
     def healthcheck() -> Union[bool, dict] {
 
-        test_prompt_messages = [{"system" : "Output the result of 2 + 2"}];
+        
 
         try {
-            model_action = self.get_agent().get_action(action_label=self.model_action);
-            if( model_action_result := model_action.call_model(
-                prompt_messages = test_prompt_messages,
-                prompt_variables = {},
-                model_name = self.model_name,
-                model_temperature = self.model_temperature,
-                model_max_tokens = self.model_max_tokens,
-            )) {               # set the interaction message+
-                interaction_message = model_action_result.get_result();
-                if not interaction_message {
-                    return {
-                        "status": False,
-                        "message": "No valid result from LLM call. Check API key and model configuration.",
-                        "severity": "error"
-                    };
-                } else {
-                    return True;
-                }
+            if (not self.metadata_ref_fields) {
+                return {
+                    "status": False,
+                    "message": "Missing required metadata_ref_fields",
+                    "severity": "error"
+                };
             }
-            return {
-                "status": False,
-                "message": "Unable to execute LLM call. Check API key and model configuration.",
-                "severity": "error"
-            };
+            if (not self.metadata_ref_format) {
+                return {
+                    "status": False,
+                    "message": "Missing required metadata_ref_format",
+                    "severity": "error"
+                };
+            }
+            if (not self.channel_format_directives) {
+                return {
+                    "status": False,
+                    "message": "Missing required channel_format_directives",
+                    "severity": "error"
+                };
+            }
+
+            if (not self.model_name) {
+                return {
+                    "status": False,
+                    "message": "Missing required model_name",
+                    "severity": "error"
+                };
+            }
+
+            if (not self.prompt) {
+                return {
+                    "status": False,
+                    "message": "Missing required prompt",
+                    "severity": "error"
+                };
+            }
+
+            if (not self.retrieval_interact_action) {
+                return {
+                    "status": False,
+                    "message": "Missing required retrieval_interact_action",
+                    "severity": "error"
+                };
+            }
+
         } except Exception as e {
             self.logger.error(f"An exception occurred in {self.label}:\n{traceback.format_exc()}\n");
             return {
