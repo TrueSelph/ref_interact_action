@@ -236,7 +236,7 @@ node RefInteractAction(InteractAction) {
 
     def healthcheck() -> Union[bool, dict] {
 
-        
+
 
         try {
             if (not self.metadata_ref_fields) {
