@@ -182,7 +182,7 @@ node RefInteractAction(InteractAction) {
 
         utterance = retrieval_context.get('query', '');
         response_context = retrieval_context.get('context', []);
-        response = visitor.interaction_node.response.get('message', {}).get('content', '');
+        response = visitor.interaction_node.get_response().message.content;
 
         try {
             if (utterance and response_context) {
