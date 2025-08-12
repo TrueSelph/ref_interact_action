@@ -1,14 +1,14 @@
-import:py logging;
-import:py traceback;
-import:py from logging { Logger }
-import:jac from jivas.agent.action.actions { Actions }
-import:jac from jivas.agent.action.interact_action { InteractAction }
-import:jac from jivas.agent.action.interact_graph_walker { interact_graph_walker }
-import:jac from jivas.agent.action.retrieval_interact_action { RetrievalInteractAction }
-import:jac from jivas.agent.memory.interaction_response { InteractionMessage, TextInteractionMessage, SilentInteractionMessage }
+import logging;
+import traceback;
+import from logging { Logger }
+import from jivas.agent.action.actions { Actions }
+import from jivas.agent.action.interact_action { InteractAction }
+import from jivas.agent.action.agent_graph_walker { agent_graph_walker }
+import from jivas.agent.action.retrieval_interact_action { RetrievalInteractAction }
+import from jivas.agent.memory.interaction_response { InteractionMessage, TextInteractionMessage, SilentInteractionMessage }
 
 
-node RefInteractAction :InteractAction: {
+node RefInteractAction(InteractAction) {
     # manages phoneme-based prompting to customize the pronunciation of certain words for text-to-speech models used by an agent
     # always ensure that this is registered after the final response is generated
 
@@ -26,7 +26,7 @@ node RefInteractAction :InteractAction: {
             "- Italic: Wrap text with underscores (_text_)\n"
             "- Bold: Wrap text with asterisks (*text*)\n"
             "- Strikethrough: Wrap text with tildes (~text~)\n"
-            "- URLs: Reformat all URLs to use raw URLs and not hyperlinks.\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Separate paragraphs with line breaks"
         ),
 
@@ -38,7 +38,7 @@ node RefInteractAction :InteractAction: {
             "- Bullet lists: Start lines with * or -\n"
             "- Numbered lists: Begin with 1. 2. 3.\n"
             "- Quotes: Prefix lines with > symbol\n"
-            "- URLs: Reformat all URLs to use raw URLs and not hyperlinks.\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Separate sections with line breaks"
         ),
 
@@ -46,7 +46,7 @@ node RefInteractAction :InteractAction: {
             "Structure Instagram content with:\n"
             "- Bold: Surround text with asterisks (*text*)\n"
             "- Italic: Surround text with underscores (_text_)\n"
-            "- URLs: Place only in bio or caption as plain text\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Use single line breaks between paragraphs\n"
             "- Maximum 30 hashtags at caption end"
         ),
@@ -55,7 +55,7 @@ node RefInteractAction :InteractAction: {
             "Structure Twitter/X posts with:\n"
             "- Bold: Use asterisks (*text*)\n"
             "- Italic: Use underscores (_text_)\n"
-            "- URLs: Prefer shortened versions (like bit.ly/example)\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Threads: Start with (1/3) indicator\n"
             "- Keep under 280 characters per tweet"
         ),
@@ -65,7 +65,7 @@ node RefInteractAction :InteractAction: {
             "- Bold: Asterisks around text (*text*)\n"
             "- Italic: Underscores around text (_text_)\n"
             "- Bullets: Start lines with * or -\n"
-            "- URLs: Reformat all URLs to use raw URLs and not hyperlinks.\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Sections: Separate with --- on own line\n"
             "- Paragraphs: Maximum 5 lines each"
         ),
@@ -76,7 +76,7 @@ node RefInteractAction :InteractAction: {
             "- Italic: Surround with underscores (_emphasis_)\n"
             "- Lists: Use * or - for bullet points\n"
             "- Quotes: Begin lines with > symbol\n"
-            "- URLs: Plain text with descriptive context\n"
+            "- URLs: Display URLs as-is, no markdown formatting.\n"
             "- Subject lines: Under 60 characters\n"
             "- Include formal greetings/closings"
         ),
@@ -156,7 +156,7 @@ node RefInteractAction :InteractAction: {
     # an example format used for formatting the references based on the metadata_ref_fields
     has metadata_ref_format:str = "<source>, pg. <page>";
 
-    can post_register() {
+    def post_register() {
         # to ensure compatibility, add this action to the exception list in intent_classifier
         if(intent_interact_action_node := self.get_agent().get_action(action_label='IntentInteractAction')) {
             if(self.get_type() not in intent_interact_action_node.exceptions) {
@@ -166,23 +166,23 @@ node RefInteractAction :InteractAction: {
         self.get_agent().get_actions() spawn _configure_retrieval_action(self.retrieval_interact_action);
     }
 
-    can touch(visitor: interact_graph_walker) -> bool {
-        response_context = visitor.interaction_node.context_data.get(self.retrieval_interact_action, {}).get('context', []);
+    def touch(visitor: agent_graph_walker) -> bool {
+        response_context = visitor.interaction_node.data_get(self.retrieval_interact_action, {});
         if(visitor.interaction_node.has_response() and response_context) {
             return True;
         }
     }
 
-    can on_enable() {
+    def on_enable() {
         self.get_agent().get_actions() spawn _configure_retrieval_action(self.retrieval_interact_action);
     }
 
-    can execute(visitor: interact_graph_walker) -> dict {
-        retrieval_context = visitor.interaction_node.context_data.get(self.retrieval_interact_action, {});
+    def execute(visitor: agent_graph_walker) -> None {
+        retrieval_context = visitor.interaction_node.data_get(self.retrieval_interact_action, {});
 
         utterance = retrieval_context.get('query', '');
         response_context = retrieval_context.get('context', []);
-        response = visitor.interaction_node.response.get('message', {}).get('content', '');
+        response = visitor.interaction_node.get_response().message.content;
 
         try {
             if (utterance and response_context) {
@@ -202,11 +202,9 @@ node RefInteractAction :InteractAction: {
                         model_action_result = model_action.call_model(
                             prompt_messages=prompt_messages,
                             prompt_variables=prompt_variables,
-                            kwargs={
-                                "model_name": self.model_name,
-                                "model_temperature": self.model_temperature,
-                                "model_max_tokens": self.model_max_tokens
-                            },
+                            model_name = self.model_name,
+                            model_temperature = self.model_temperature,
+                            model_max_tokens = self.model_max_tokens,
                             interaction_node=visitor.interaction_node
                         );
 
@@ -231,39 +229,62 @@ node RefInteractAction :InteractAction: {
         }
     }
 
-    can get_channel_format_directive(visitor: interact_graph_walker) -> dict {
+    def get_channel_format_directive(visitor: agent_graph_walker) -> dict {
         channel = visitor.interaction_node.channel or "default";
         return self.channel_format_directives.get(channel, None);
     }
 
-    can healthcheck() -> Union[bool, dict] {
+    def healthcheck() -> Union[bool, dict] {
 
-        test_prompt_messages = [{"system" : "Output the result of 2 + 2"}];
-        test_kwargs = {
-            "model_name": self.model_name,
-            "model_temperature": self.model_temperature,
-            "model_max_tokens": self.model_max_tokens
-        };
+
 
         try {
-            model_action = self.get_agent().get_action(action_label=self.model_action);
-            if( model_action_result := model_action.call_model(prompt_messages = test_prompt_messages, prompt_variables = {}, kwargs = test_kwargs)) {               # set the interaction message+
-                interaction_message = model_action_result.get_result();
-                if not interaction_message {
-                    return {
-                        "status": False,
-                        "message": "No valid result from LLM call. Check API key and model configuration.",
-                        "severity": "error"
-                    };
-                } else {
-                    return True;
-                }
+            if (not self.metadata_ref_fields) {
+                return {
+                    "status": False,
+                    "message": "Missing required metadata_ref_fields",
+                    "severity": "error"
+                };
             }
-            return {
-                "status": False,
-                "message": "Unable to excute LLM call. Check API key and model configuration.",
-                "severity": "error"
-            };
+            if (not self.metadata_ref_format) {
+                return {
+                    "status": False,
+                    "message": "Missing required metadata_ref_format",
+                    "severity": "error"
+                };
+            }
+            if (not self.channel_format_directives) {
+                return {
+                    "status": False,
+                    "message": "Missing required channel_format_directives",
+                    "severity": "error"
+                };
+            }
+
+            if (not self.model_name) {
+                return {
+                    "status": False,
+                    "message": "Missing required model_name",
+                    "severity": "error"
+                };
+            }
+
+            if (not self.prompt) {
+                return {
+                    "status": False,
+                    "message": "Missing required prompt",
+                    "severity": "error"
+                };
+            }
+
+            if (not self.retrieval_interact_action) {
+                return {
+                    "status": False,
+                    "message": "Missing required retrieval_interact_action",
+                    "severity": "error"
+                };
+            }
+
         } except Exception as e {
             self.logger.error(f"An exception occurred in {self.label}:\n{traceback.format_exc()}\n");
             return {

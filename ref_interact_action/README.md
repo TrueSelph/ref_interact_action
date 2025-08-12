@@ -12,8 +12,8 @@ JIVAS action that adds references for the context that was used to generate the 
 
 - **Name:** `jivas/ref_interact_action`
 - **Author:** [V75 Inc.](https://v75inc.com/)
-- **Architype:** `RefInteractAction`
-- **Version:** `0.0.1`
+- **archetype:** `RefInteractAction`
+- **Version:** `0.1.0`
 
 ## Meta Information
 
@@ -32,12 +32,12 @@ JIVAS action that adds references for the context that was used to generate the 
 
 ## Dependencies
 
-- **Jivas:** `^2.0.0`
+- **Jivas:** `^2.1.0`
 - **Actions:**
-  - `jivas/persona_interact_action`: `~0.0.1`
+  - `jivas/persona_interact_action`: `~0.1.0`
 
 
-This package is designed to add references to the context that was used to generate the response. It is a core interact action, configured as a singleton. The package requires the Jivas library version 2.0.0 and includes specific action dependencies such as `persona_interact_action`.
+This package is designed to add references to the context that was used to generate the response. It is a core interact action, configured as a singleton. The package requires the Jivas library version 2.1.0 and includes specific action dependencies such as `persona_interact_action`.
 
 ---
 
